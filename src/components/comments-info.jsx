@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { ContextProvider } from "../context/DataContext";
 import InputBox from "../ui/inputbox";
 import Button from "../ui/button";
@@ -51,8 +51,11 @@ export default function CommentInfo({ data }) {
 
   // Recursive function to add a new reply to the targeted comment
   const updateReplies = function (comments) {
-    // Creating a new reply object
+    if (inputBox.inputValue.trim().length === 0) {
+      return comments;
+    }
 
+    // Creating a new reply object
     let newReply = {
       id: Date.now(),
       like: 0,
@@ -78,7 +81,6 @@ export default function CommentInfo({ data }) {
           replies: updateReplies(comment.replies),
         };
       }
-
       return comment;
     });
   };
@@ -89,20 +91,32 @@ export default function CommentInfo({ data }) {
     setCommentsData(repliesComments);
 
     // Reset input box state after adding the reply
-    setInputBox({ showReplies: false, inputValue: "" });
+    if (inputBox.inputValue.length !== 0) {
+      setInputBox({ inputValue: "", showReplies: false });
+    }
   };
 
+  // Delete the targeted comment
   const deleteComment = function () {
     const deleteData = commentsData.filter((comment) => comment.id !== data.id);
     setCommentsData(deleteData);
   };
 
+  // Enable edit mode for the comment
   const editComment = function () {
     setInputBox({ ...inputBox, isEdit: true });
   };
 
+  // Update the comment with the new content
   const updateComment = function () {
-    console.log(inputBox);
+    const updateData = commentsData.map((comment) => {
+      if (comment.id === data.id) {
+        return { ...comment, comment: inputBox.inputValue };
+      }
+      return comment;
+    });
+    setCommentsData(updateData);
+    setInputBox({ ...inputBox, isEdit: false });
   };
 
   return (
@@ -142,7 +156,7 @@ export default function CommentInfo({ data }) {
                   onClick={editComment}
                 >
                   <span className="p-[5px]">
-                    <img src="/icon-edit.svg" alt="edit" />
+                    <img src="/icon-edit.svg" alt="edit-icon" />
                   </span>
                   Edit
                 </p>
@@ -151,7 +165,7 @@ export default function CommentInfo({ data }) {
                   onClick={deleteComment}
                 >
                   <span className="p-[5px]">
-                    <img src="/icon-delete.svg" alt="edit" />
+                    <img src="/icon-delete.svg" alt="delete-icon" />
                   </span>
                   Delete
                 </p>
@@ -160,12 +174,15 @@ export default function CommentInfo({ data }) {
 
             <p
               className="flex items-center text-indigo-600 font-medium cursor-pointer"
-              onClick={() =>
-                setInputBox({ ...inputBox, showReplies: !inputBox.showReplies })
-              }
+              onClick={() => {
+                setInputBox({
+                  ...inputBox,
+                  showReplies: !inputBox.showReplies,
+                });
+              }}
             >
               <span className="p-[5px]">
-                <img src="/icon-reply.svg" alt="edit" />
+                <img src="/icon-reply.svg" alt="reply-icon" />
               </span>
               Reply
             </p>
@@ -185,9 +202,9 @@ export default function CommentInfo({ data }) {
               </div>
             ) : (
               <p className="text-left text-slate-400 font-medium">
-                {/* {inputBox.parentName && inputBox.parentName.length > 0 && (
-                <strong className="text-black">@{inputBox.parentName}</strong>
-              )} */}
+                {/* {inputBox.parentName && inputBox.parentName.length > 0 && ( */}
+                {/* <strong className="text-black">@{inputBox.parentName}</strong> */}
+                {/* )} */}
 
                 {data.comment}
               </p>

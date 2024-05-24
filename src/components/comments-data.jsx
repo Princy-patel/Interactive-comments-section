@@ -1,5 +1,5 @@
-import React, { Fragment } from 'react';
-import CommentInfo from './comments-info';
+import React, { Fragment } from "react";
+import CommentInfo from "./comments-info";
 
 function CommentsData({ commentsData }) {
   return (
